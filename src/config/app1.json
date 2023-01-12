@@ -1,0 +1,69 @@
+{
+    "name": "app1",
+    "input":
+    [
+        {
+            "queue": "app1_input_image",
+            "datatype": "image"
+        }
+    ],
+    "output":
+    [
+        {
+            "queue": "app1_output_enhanced_image",
+            "datatype": "image"
+        },
+        {
+            "queue": "app1_output_objectDetection_json",
+            "datatype": "json"
+        }
+    ],
+    "topology":
+    [
+        {
+            "source": {
+                "type": "input",
+                "queue": "app1_input_image"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "server1_input_image"
+                },
+                {
+                    "type": "server",
+                    "queue": "server2_input_image"
+                }
+
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "server1_output_image"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "server2_input_image"
+                },
+                {
+                    "type": "output",
+                    "queue": "app1_output_enhanced_image"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "server2_output_json"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "app1_output_objectDetection_json"
+                }
+            ]
+        }
+    ]
+}
