@@ -1,4 +1,6 @@
 import requests, json
+import argparse
+import pika
 
 class TopolgyValidator():
     def __init__(self, host="140.113.193.10:15672", user="guest", password="guest") -> None:
@@ -6,10 +8,8 @@ class TopolgyValidator():
         self.user = user
         self.password = password
 
-    def validate_cfg(self, json_file:str) -> bool:
-        with open(json_file) as f:
-            cfg = json.load(f)
-
+    def validate_cfg(self, cfg: dict[str, object]):
+        self.check_connection(cfg["central_broker"]["host"], cfg["central_broker"]["connection_port"])
         central_queues = self.get_queues_name()
         server_outputs = self.get_exchange_outputs()
         input_queues = [input_queue["queue"] for input_queue in cfg["input"]]
@@ -49,7 +49,7 @@ class TopolgyValidator():
                     if dst_queue["type"] != "server" and dst_queue["type"] != "output":
                         raise Exception(f"[{dst_queue['queue']}] Server output can only route to server_input_queue or app_output_queue.")
 
-    def get_exchange_outputs(self) -> list:
+    def get_exchange_outputs(self) -> list[str]:
         api = "/api/exchanges"
         response = requests.get(f"http://{self.host}{api}", auth=(self.user, self.password))
         exchange_outputs = []
@@ -59,17 +59,31 @@ class TopolgyValidator():
                     exchange_outputs += exchange["arguments"]["output"]
             return exchange_outputs
         else:
-            raise Exception("Server status code:", response.status_code)
+            raise Exception("Central Management server status code:", response.status_code)
 
-    def get_queues_name(self) -> list:
+    def get_queues_name(self) -> list[str]:
         api = "/api/queues"
         response = requests.get(f"http://{self.host}{api}", auth=(self.user, self.password))
         if response.status_code == 200:
             return [queue["name"] for queue in response.json()]
         else:
-            raise Exception("Server status code:", response.status_code)
+            raise Exception("Central Management server status code:", response.status_code)
+
+    def check_connection(self, host, port) -> None:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port))
+        except pika.exceptions.AMQPConnectionError:
+            raise Exception("Central Connection server error, please check host and port.")
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cfg", help="The app configuration file path", required=True)
+    args = parser.parse_args()
     validator = TopolgyValidator()
-    validator.validate_cfg("app1.json")
+    with open(args.cfg) as f:
+        cfg = json.load(f)
+        try:
+            validator.validate_cfg(cfg)
+        except Exception as e:
+            print(e)

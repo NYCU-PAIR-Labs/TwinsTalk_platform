@@ -1,5 +1,15 @@
 {
     "name": "app1",
+    "central_broker": {
+        "host": "140.113.193.10",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "app_broker": {
+        "host": "140.113.193.17",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
     "input":
     [
         {

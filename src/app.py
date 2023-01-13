@@ -6,24 +6,25 @@ import argparse
 class AppQueueConsumer(Process):
     def __init__(self, json_file) -> None:
         Process.__init__(self)
-        self.central_connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
+        with open(json_file) as f:
+            cfg = json.load(f)
+
+        cfg["central_broker"]["host"]
+        self.central_connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg["central_broker"]["host"], port=cfg["central_broker"]["connection_port"]))
         self.central_channel = self.central_connection.channel()
-        self.app_connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.17', port=5672))
+        self.app_connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg["app_broker"]["host"], port=cfg["app_broker"]["connection_port"]))
         self.app_channel = self.app_connection.channel()
 
         self.input_queue = []
         self.publish_table = {}
 
-        self.parse_config(json_file)
+        self.parse_config(cfg)
 
         # Set callback function of input queue
         for input in self.input_queue:
             self.app_channel.basic_consume(queue=input, on_message_callback=self.__input_queue_callback, auto_ack=True)
 
-    def parse_config(self, json_file:str) -> bool:
-        with open(json_file) as f:
-            cfg = json.load(f)
-        
+    def parse_config(self, cfg: dict) -> None:
         # create app exchange in app broker
         self.name = cfg["name"]
         print(f"Create Exchange in [{self.name}] broker")
@@ -74,16 +75,19 @@ class AppQueueConsumer(Process):
 class CentralQueueConsumer(Process):
     def __init__(self, json_file) -> None:
         Process.__init__(self)
-        self.central_connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
+        with open(json_file) as f:
+            cfg = json.load(f)
+
+        self.central_connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg["central_broker"]["host"], port=cfg["central_broker"]["connection_port"]))
         self.central_channel = self.central_connection.channel()
-        self.app_connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.17', port=5672))
+        self.app_connection = pika.BlockingConnection(pika.ConnectionParameters(host=cfg["app_broker"]["host"], port=cfg["app_broker"]["connection_port"]))
         self.app_channel = self.app_connection.channel()
 
         self.output_queue = []
         self.exchange_binding_table = {}
         self.queue_binding_table = {}
 
-        self.parse_config(json_file)
+        self.parse_config(cfg)
         self.set_exchange_binding()
         self.set_output_queue_binding()
 
@@ -91,10 +95,7 @@ class CentralQueueConsumer(Process):
         for output in self.output_queue:
             self.central_channel.basic_consume(queue=output, on_message_callback=self.__output_queue_callback, auto_ack=True)
 
-    def parse_config(self, json_file:str) -> bool:
-        with open(json_file) as f:
-            cfg = json.load(f)
-
+    def parse_config(self, cfg: dict) -> None:
         self.name = cfg["name"]
 
         # parse output part
