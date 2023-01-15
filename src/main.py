@@ -14,8 +14,8 @@ controller = AppController()
 def read_root():
     return {"Hello": "World"}
 
-@api.post("/app")
-def create_app(file: UploadFile):
+@api.post("/apps")
+async def create_app(file: UploadFile):
     try:
         cfg = json.load(file.file)
         result = controller.create_app(cfg)
@@ -23,11 +23,17 @@ def create_app(file: UploadFile):
             json_object = json.dumps(cfg, indent=4)
             f.write(json_object)
     except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
     return result
+
+@api.delete("/apps/{app_name}")
+async def delete_app(app_name: str):
+    try:
+        controller.delete_app(app_name)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {"status": "OK"}
 
 if __name__ == '__main__':
     uvicorn.run("main:api", reload=True)

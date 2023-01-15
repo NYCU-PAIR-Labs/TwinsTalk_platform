@@ -10,7 +10,8 @@ class AppController():
     def create_app(self, cfg: dict) -> dict[str: str]:
         name = cfg["name"]
         # Check and validate app
-        self.get_container(name)
+        if self.get_container(name):
+            raise Exception("The app is already existed.")
         self.validator.validate_cfg(cfg)
 
         print(f"[Info] Start to create {name} container and {name} broker container")
@@ -41,12 +42,23 @@ class AppController():
         return {"status": "Build App successfully."}
 
     # return true if container exist, otherwise return false
-    def get_container(self, container_name) -> None:
+    def get_container(self, container_name) -> bool:
         try:
             self.docker_client.containers.get(container_name)
         except docker.errors.NotFound:
-            return
-        raise Exception("The app is already existed.")
+            return False
+        return True
+
+    def delete_app(self, app_name):
+        print(f"Delete {app_name} container and broker.")
+        try:
+            app_container = self.docker_client.containers.get(app_name)
+            app_broker_container = self.docker_client.containers.get(f"{app_name}_broker")
+            app_container.kill(signal="SIGINT")
+            app_broker_container.stop()
+        except docker.errors.NotFound:
+            raise Exception(f"[{app_name}] doesn't exist")
+
 
 if __name__ == "__main__":
     controller = AppController()
