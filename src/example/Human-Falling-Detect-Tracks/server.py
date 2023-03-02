@@ -14,7 +14,8 @@ from Track.Tracker import Detection, Tracker
 from ActionsEstLoader import TSSTG
 
 class HAR():
-    def __init__(self) -> None:
+    def __init__(self, clientID) -> None:
+        self.clientID = clientID
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         # DETECTION MODEL.
@@ -85,7 +86,7 @@ class HAR():
                     pts = np.array(track.keypoints_list, dtype=np.float32)
                     out = self.action_model.predict(pts, img.shape[:2])
                     action_name = self.action_model.class_names[out[0].argmax()]
-                    action = f"TrackID:{track_id}, Action:{action_name}, Probability:{out[0].max()*100:.2f}"
+                    action = f"ClientID:{self.clientID}, TrackID:{track_id}, Action:{action_name}, Probability:{out[0].max()*100:.2f}"
                     print(action)
 
 class FallDetectorGCN():
@@ -108,7 +109,7 @@ class FallDetectorGCN():
             client_id = routing_key_tokens[1]
 
             if client_id not in self.client_detector.keys():
-                self.client_detector[client_id] = HAR()
+                self.client_detector[client_id] = HAR(client_id)
                 print(f"Add new client: {client_id}")
 
             # Write your service from here
