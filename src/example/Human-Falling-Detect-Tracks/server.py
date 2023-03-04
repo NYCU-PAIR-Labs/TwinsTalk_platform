@@ -88,6 +88,9 @@ class HAR():
                     action_name = self.action_model.class_names[out[0].argmax()]
                     action = f"ClientID:{self.clientID}, TrackID:{track_id}, Action:{action_name}, Probability:{out[0].max()*100:.2f}"
                     print(action)
+                    if action_name == "Lying Down":
+                        return action
+        return None
 
 class FallDetectorGCN():
     def __init__(self) -> None:
@@ -116,7 +119,12 @@ class FallDetectorGCN():
             img_bytes = np.frombuffer(body, dtype=np.uint8)
             img = cv2.imdecode(img_bytes, 1)
 
-            self.client_detector[client_id].detect(img)
+            result = self.client_detector[client_id].detect(img)
+            if result:
+                print(f"Detect {app_name}.{client_id} FALL!")
+                self.channel.basic_publish(exchange="FallDetectorGCN",
+                                           routing_key=f"{app_name}.{client_id}.FallDetectorGCN.text",
+                                           body=result)
 
 
     def run(self):
