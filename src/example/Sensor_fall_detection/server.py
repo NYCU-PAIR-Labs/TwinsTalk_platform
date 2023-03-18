@@ -29,7 +29,7 @@ class Fall_detector_LSTM():
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
         self.channel = self.connection.channel()
 
-        self.channel.exchange_declare(exchange="FallDetectorLSTM", exchange_type="topic", auto_delete=True)
+        self.channel.exchange_declare(exchange="FallDetectorLSTM", exchange_type="topic", auto_delete=True, arguments={"output":["FallDetectorLSTM_output_text"]})
         self.channel.queue_declare(queue='FallDetectorLSTM_input_nparray', exclusive=True)
         self.channel.queue_bind(queue="FallDetectorLSTM_input_nparray", exchange="FallDetectorLSTM", routing_key=f"*.*.*.nparray")
 

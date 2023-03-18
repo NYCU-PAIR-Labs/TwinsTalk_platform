@@ -1,12 +1,12 @@
 import pika, sys, os
 
 def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.17', port=5672))
     channel = connection.channel()
 
     channel.queue_declare(queue='Monitor', exclusive=True)
-    #channel.queue_bind(queue="Monitor", exchange="FallDetectorLSTM", routing_key="AccidentDetect.*.*.text")
-    channel.queue_bind(queue="Monitor", exchange="FallDetectorGCN", routing_key="AccidentDetect.*.*.text")
+    channel.queue_bind(queue="Monitor", exchange="AccidentDetect", routing_key="AccidentDetect.*.FallDetectorGCN.text")
+    channel.queue_bind(queue="Monitor", exchange="AccidentDetect", routing_key="AccidentDetect.*.FallDetectorLSTM.text")
 
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body)

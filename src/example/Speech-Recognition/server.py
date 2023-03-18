@@ -4,11 +4,12 @@ import wave
 from deepspeech import Model
 
 class DeepSpeech():
+    # DeepSpeech expects audio files to be WAV format, mono-channel, and with a 16kHz sampling rate.
     def __init__(self) -> None:
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
         self.channel = self.connection.channel()
 
-        self.channel.exchange_declare(exchange="DeepSpeech", exchange_type="topic", auto_delete=True)
+        self.channel.exchange_declare(exchange="DeepSpeech", exchange_type="topic", auto_delete=True, arguments={"output":["DeepSpeech_output_text"]})
         self.channel.queue_declare(queue='DeepSpeech_input_audio', exclusive=True)
         self.channel.queue_bind(queue="DeepSpeech_input_audio", exchange="DeepSpeech", routing_key=f"*.*.*.audio")
 

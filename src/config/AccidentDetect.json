@@ -1,0 +1,114 @@
+{
+    "name": "AccidentDetect",
+    "central_broker": {
+        "host": "140.113.193.10",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "app_broker": {
+        "host": "140.113.193.17",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "input":
+    [
+        {
+            "queue": "png_image",
+            "datatype": "image"
+        },
+        {
+            "queue": "wav_audio",
+            "datatype": "audio"
+        },
+        {
+            "queue": "acc_nparray",
+            "datatype": "nparray"
+        }
+    ],
+    "output":
+    [
+        {
+            "queue": "fall_detection_text",
+            "datatype": "text"
+        },
+        {
+            "queue": "speech_recognition_text",
+            "datatype": "text"
+        }
+    ],
+    "topology":
+    [
+        {
+            "source": {
+                "type": "input",
+                "queue": "png_image"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "FallDetectorGCN_input_image"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "input",
+                "queue": "wav_audio"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "DeepSpeech_input_audio"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "input",
+                "queue": "acc_nparray"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "FallDetectorLSTM_input_nparray"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "FallDetectorLSTM_output_text"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "fall_detection_text"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "FallDetectorGCN_output_text"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "fall_detection_text"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "DeepSpeech_output_text"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "speech_recognition_text"
+                }
+            ]
+        }
+    ]
+}

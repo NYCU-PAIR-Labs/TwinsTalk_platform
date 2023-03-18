@@ -97,9 +97,9 @@ class FallDetectorGCN():
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.10', port=5672))
         self.channel = self.connection.channel()
 
-        self.channel.exchange_declare(exchange="FallDetectorGCN", exchange_type="topic", auto_delete=True)
-        self.channel.queue_declare(queue='FallDetectorGCN_input_file', exclusive=True)
-        self.channel.queue_bind(queue="FallDetectorGCN_input_file", exchange="FallDetectorGCN", routing_key=f"*.*.*.file")
+        self.channel.exchange_declare(exchange="FallDetectorGCN", exchange_type="topic", auto_delete=True, arguments={"output":["FallDetectorGCN_output_text"]})
+        self.channel.queue_declare(queue='FallDetectorGCN_input_image', exclusive=True)
+        self.channel.queue_bind(queue="FallDetectorGCN_input_image", exchange="FallDetectorGCN", routing_key=f"*.*.*.image")
 
         self.client_detector = {}
 
@@ -128,7 +128,7 @@ class FallDetectorGCN():
 
 
     def run(self):
-        self.channel.basic_consume(queue='FallDetectorGCN_input_file', on_message_callback=self.__callback, auto_ack=True)
+        self.channel.basic_consume(queue='FallDetectorGCN_input_image', on_message_callback=self.__callback, auto_ack=True)
 
         print(' [*] Waiting for messages. To exit press CTRL+C')
         self.channel.start_consuming()

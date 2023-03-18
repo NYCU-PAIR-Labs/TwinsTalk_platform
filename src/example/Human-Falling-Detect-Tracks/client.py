@@ -13,7 +13,7 @@ def send_image(folder_idx, clientID):
         with open(f"./Video/fall-{folder_idx}-cam0-rgb/{i}", "rb") as f:
             data = f.read()
             channel.basic_publish(exchange='FallDetectorGCN',
-                        routing_key=f'AccidentDetect.{clientID}.NULL.file',
+                        routing_key=f'AccidentDetect.{clientID}.null.image',
                         body=data)
     print(f"{clientID} done.")
     connection.close()
