@@ -4,6 +4,5 @@ WORKDIR /usr/src/app
 COPY server.py ./
 COPY SmartFall_lstm.pth ./
 RUN pip install pika
-RUN pip install pika
 
 CMD [ "python", "./server.py"]
