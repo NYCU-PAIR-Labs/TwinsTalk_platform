@@ -20,9 +20,9 @@ class LSTMNet(nn.Module):
         return out
     
     def init_hidden(self, x):
-        h0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim)
-        c0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim)
-        return [t.cuda() for t in (h0, c0)]
+        h0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim, device=x.device)
+        c0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim, device=x.device)
+        return [t for t in (h0, c0)]
 
 class Fall_detector_LSTM():
     def __init__(self) -> None:
@@ -40,7 +40,7 @@ class Fall_detector_LSTM():
         n_layers = 2
         hidden_dim = 256
         self.model = LSTMNet(input_dim, hidden_dim, output_dim, n_layers).to(self.device)
-        self.model.load_state_dict(torch.load('SmartFall_lstm.pth'))
+        self.model.load_state_dict(torch.load('SmartFall_lstm.pth', map_location=self.device))
         print("Load model successfully")
 
     def __callback(self, ch, method, properties, body):
