@@ -32,10 +32,10 @@ class AppQueueConsumer(Process):
 
         # create queue in app broker to receive client's messages
         for input in cfg["input"]:
-            self.input_queue.append(input["queue"])
-            self.app_channel.queue_declare(queue=input["queue"], exclusive=True)
+            self.input_queue.append(input)
+            self.app_channel.queue_declare(queue=input, exclusive=True)
             # binding key = <app>.<client>.<server>.<datatype>
-            self.app_channel.queue_bind(exchange=self.name, queue=input["queue"], routing_key=f"{self.name}.*.null.{input['datatype']}")
+            self.app_channel.queue_bind(exchange=self.name, queue=input, routing_key=f"{self.name}.*.{input}")
         print("Input queue:", self.input_queue)
 
         # parse topology
@@ -52,16 +52,14 @@ class AppQueueConsumer(Process):
         '''
         method: [consumer_tag, delivery_tag, exchange, redelivered, routing_key]
         '''
-        # client's message routing key = <app>.<clientID>.<null>.<datatype>
-        print(f"Receive {body} with routing key {method.routing_key}")
-        for input_queue in self.publish_table.keys():
-            queue_datatype = input_queue.split("_")[-1]
-            message_datatype = method.routing_key.split(".")[-1]
+        # client's message routing key = <app>.<clientID>.<inputQueue>
+        print(f"Receive {len(body)} with routing key {method.routing_key}")
+        app, clientID, input_queue = method.routing_key.split(".")
+        queue_datatype = input_queue.split("_")[-1]
 
-            if queue_datatype == message_datatype:
-                for server_queue in self.publish_table[input_queue]:
-                    server_exchange = server_queue.split("_")[0]
-                    self.central_channel.basic_publish(exchange=server_exchange, routing_key=method.routing_key, body=body)
+        for server_queue in self.publish_table[input_queue]:
+            server_exchange = server_queue.split("_")[0]
+            self.central_channel.basic_publish(exchange=server_exchange, routing_key=f"{app}.{clientID}.null.{queue_datatype}", body=body)
 
     def run(self):
         print("Start App consumer")
@@ -93,15 +91,15 @@ class CentralQueueConsumer(Process):
 
         # Set callback function of output queue
         for output in self.output_queue:
-            self.central_channel.basic_consume(queue=output, on_message_callback=self.__output_queue_callback, auto_ack=True)
+            self.central_channel.basic_consume(queue=output, on_message_callback=self.__output_queue_callback, auto_ack=True, consumer_tag=output)
 
     def parse_config(self, cfg: dict) -> None:
         self.name = cfg["name"]
 
         # parse output part
         for output in cfg["output"]:
-            self.output_queue.append(output["queue"])
-            self.central_channel.queue_declare(queue=output["queue"], exclusive=True)
+            self.output_queue.append(output)
+            self.central_channel.queue_declare(queue=output, exclusive=True)
         print("Output queue:", self.output_queue)
 
         # parse topology
@@ -140,8 +138,10 @@ class CentralQueueConsumer(Process):
         '''
         method: [consumer_tag, delivery_tag, exchange, redelivered, routing_key]
         '''
-        print(f"Receive {body} with routing key {method.routing_key}")
-        self.app_channel.basic_publish(exchange=self.name, routing_key=method.routing_key, body=body)
+        # routing key = <app>.<clientID>.<server>.<datatype>
+        print(f"Receive {len(body)} with routing key {method.routing_key}")
+        clientID = method.routing_key.split(".")[1]
+        self.app_channel.basic_publish(exchange=self.name, routing_key=f"{self.name}.{clientID}.{method.consumer_tag}", body=body)
 
     def run(self):
         print("Start Central consumer")

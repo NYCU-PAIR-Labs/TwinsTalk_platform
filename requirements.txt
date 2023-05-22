@@ -1,0 +1,5 @@
+pika
+fastapi
+uvicorn
+python-multipart
+docker
