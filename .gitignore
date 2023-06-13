@@ -2,5 +2,4 @@ __pycache__
 src/example/Human-Falling-Detect-Tracks/Video
 *.pth
 *.cfg
-src/example/Speech-Recognition/Audio
 src/example/Speech-Recognition/Model/deepspeech*
