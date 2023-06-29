@@ -1,0 +1,57 @@
+{
+    "name": "updrsDemo",
+    "central_broker": {
+        "host": "140.113.193.10",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "app_broker": {
+        "host": "140.113.193.17",
+        "management_port": 15673,
+        "connection_port": 5673
+    },
+    "input": [
+        "person_video"
+    ],
+    "output": [
+        "legAgility_image"
+    ],
+    "topology": [
+        {
+            "source": {
+                "type": "input",
+                "queue": "person_video"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "Pose_input_video"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "Pose_output_nparray"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "UPDRS_input_nparray"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "UPDRS_output_image"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "legAgility_image"
+                }
+            ]
+        }
+    ]
+}

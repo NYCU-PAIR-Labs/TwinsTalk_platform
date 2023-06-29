@@ -1,0 +1,45 @@
+{
+    "name": "poseDemo",
+    "central_broker": {
+        "host": "140.113.193.10",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "app_broker": {
+        "host": "140.113.193.17",
+        "management_port": 15672,
+        "connection_port": 5672
+    },
+    "input": [
+        "person_video"
+    ],
+    "output": [
+        "pose_text"
+    ],
+    "topology": [
+        {
+            "source": {
+                "type": "input",
+                "queue": "person_video"
+            },
+            "destination": [
+                {
+                    "type": "server",
+                    "queue": "Pose_input_video"
+                }
+            ]
+        },
+        {
+            "source": {
+                "type": "server",
+                "queue": "Pose_output_text"
+            },
+            "destination": [
+                {
+                    "type": "output",
+                    "queue": "pose_text"
+                }
+            ]
+        }
+    ]
+}
