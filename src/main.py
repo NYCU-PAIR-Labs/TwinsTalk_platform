@@ -5,6 +5,7 @@ from pydantic import BaseModel
 import uvicorn
 import json
 from app_controller import AppController
+import traceback
 
 
 api = FastAPI()
@@ -19,10 +20,8 @@ async def create_app(file: UploadFile):
     try:
         cfg = json.load(file.file)
         result = controller.create_app(cfg)
-        with open("./config/result.json", "w") as f:
-            json_object = json.dumps(cfg, indent=4)
-            f.write(json_object)
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
     return result
 

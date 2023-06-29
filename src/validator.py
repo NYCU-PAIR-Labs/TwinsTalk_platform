@@ -12,12 +12,12 @@ class TopolgyValidator():
         self.check_connection(cfg["central_broker"]["host"], cfg["central_broker"]["connection_port"])
         central_queues = self.get_queues_name()
         server_outputs = self.get_exchange_outputs()
-        input_queues = [input_queue["queue"] for input_queue in cfg["input"]]
-        output_queues = [output_queue["queue"] for output_queue in cfg["output"]]
+        input_queues = [input_queue for input_queue in cfg["input"]]
+        output_queues = [output_queue for output_queue in cfg["output"]]
 
         # Validate output part
         for output in cfg["output"]:
-            if output["queue"] in central_queues:
+            if output in central_queues:
                 raise Exception(f"[{output}] is already exist in central broker!")
 
         # Validate topology part 

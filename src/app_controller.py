@@ -14,6 +14,10 @@ class AppController():
             raise Exception("The app is already existed.")
         self.validator.validate_cfg(cfg)
 
+        with open(f"./config/{name}.json", "w") as f:
+            json_object = json.dumps(cfg, indent=4)
+            f.write(json_object)
+
         print(f"[Info] Start to create {name} container and {name} broker container")
         app_broker_managerment_port = cfg["app_broker"]["management_port"]
         app_broker_conneciotn_port = cfg["app_broker"]["connection_port"]
