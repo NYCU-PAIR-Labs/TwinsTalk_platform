@@ -10,10 +10,16 @@
         "management_port": 15672,
         "connection_port": 5672
     },
-    "input": ["png_image", "wav_audio", "acc_nparray"],
-    "output": ["FallDetection_text", "SpeechRecognition_text"],
-    "topology":
-    [
+    "input": [
+        "png_image",
+        "wav_audio",
+        "acc_nparray"
+    ],
+    "output": [
+        "fall_text",
+        "speech_text"
+    ],
+    "topology": [
         {
             "source": {
                 "type": "input",
@@ -58,7 +64,7 @@
             "destination": [
                 {
                     "type": "output",
-                    "queue": "FallDetection_text"
+                    "queue": "fall_text"
                 }
             ]
         },
@@ -70,7 +76,7 @@
             "destination": [
                 {
                     "type": "output",
-                    "queue": "FallDetection_text"
+                    "queue": "fall_text"
                 }
             ]
         },
@@ -82,7 +88,7 @@
             "destination": [
                 {
                     "type": "output",
-                    "queue": "SpeechRecognition_text"
+                    "queue": "speech_text"
                 }
             ]
         }

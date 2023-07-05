@@ -9,7 +9,7 @@ class Robot():
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='140.113.193.17', port=5672))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue='SpeechResult', exclusive=True)
-        self.channel.queue_bind(queue="SpeechResult", exchange="AccidentDetect", routing_key=f"AccidentDetect.*.SpeechRecognition_text")
+        self.channel.queue_bind(queue="SpeechResult", exchange="AccidentDetect", routing_key=f"AccidentDetect.*.speech_text")
         self.channel.basic_consume(queue='SpeechResult', on_message_callback=self.__callback, auto_ack=True)
 
         self.publish_flag = Event()
