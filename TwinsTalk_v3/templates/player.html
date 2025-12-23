@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>播放影片 - {{ filename }}</title>
+</head>
+<body>
+    <h2>🎬 播放中：{{ filename }}</h2>
+
+    <!-- 下載按鈕 -->
+    <p><a href="{{ url_for('stream_video', filename=filename) }}" download="{{ filename }}">⬇️ 下載影片</a></p>
+
+    <!-- 影片播放器 -->
+    <video width="720" controls autoplay>
+      <source src="{{ url_for('stream_video', filename=filename) }}" type="video/mp4">
+      您的瀏覽器不支援影片播放。
+    </video>
+
+    <p><a href="{{ url_for('index') }}">← 回到影片清單</a></p>
+</body>
+</html>

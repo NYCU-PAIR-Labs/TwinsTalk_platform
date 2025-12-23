@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TwinsTalk分析影片清單</title>
+</head>
+<body>
+    <h1>TwinsTalk已分析影片列表</h1>
+    <ul>
+    {% for video in videos %}
+        <li><a href="{{ url_for('play_video', filename=video) }}">{{ video }}</a></li>
+    {% else %}
+        <li>尚無影片資料</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
